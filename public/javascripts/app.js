@@ -64,6 +64,37 @@ class API {
       contentType: 'application/json'
     });
   }
+
+  getAllTodos(callback) {
+    $.get('/api/todos', callback, 'json');
+  }
+}
+
+class MainTemplateData {
+  constructor(todos) {
+    this.todos = this.makeTodosArray(todos);
+  }
+
+  makeTodosArray(todos) {
+    return todos.map(this.templateTodoFromAPITodo, this);
+  }
+
+  templateTodoFromAPITodo(apiTodo) {
+    let templateTodo = {};
+    templateTodo.id = apiTodo.id;
+    templateTodo.title = apiTodo.title;
+    templateTodo.completed = apiTodo.completed;
+    templateTodo.due_date = this.getDueDateFromAPITodo(apiTodo);
+    return templateTodo;
+  }
+
+  getDueDateFromAPITodo(apiTodo) {
+    if (apiTodo.month && apiTodo.year) {
+      return apiTodo.month + '/' + apiTodo.year.slice(2);
+    } else {
+      return 'No Due Date';
+    }
+  }
 }
 
 class TodoList {
@@ -82,6 +113,7 @@ class TodoList {
     let todo = {}
     $userInputs.each((_, input) => {
       if (input.value) {
+        console.log(input.value);
         todo[input.id] = input.value;
       }
     });
@@ -90,7 +122,9 @@ class TodoList {
   }
 
   makeMainTemplateObject() {
-
+    this.api.getAllTodos((data) => {
+      let mainTemplate = new MainTemplateData(data);
+    });
   }
 }
 
