@@ -2,15 +2,15 @@ Node Todo List Take Home Project
 
 Separation of concerns
 
-1. Todo Object
-  a. add, update, and delete todos by sending requests to the API
+1. API Object
+  a. Handles all requests to the API
 
 2. TodoList Object
-  a. Requests all todos from the server
-  b. Creates object to be passed into main template based on response to requesting all todos
+  a. Manipulates data from user inputs to create an object that can be sent to the API
+  b. Manipulates data received from the API to a format usable by the app object 
 
 3. App Object
   a. Binds all events
   b. Works with TodoList object to render the page
   c. Works with TodoList object to update parts of the page in response to events
-  
+
