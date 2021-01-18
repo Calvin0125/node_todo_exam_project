@@ -55,17 +55,27 @@ let templateObject = {
   }
 };
 
-class TodoList {
-  addTodoFromForm() {
-    let $form = $('#form_modal');
-    let $userInputs = $form.find('select, input[type="text"], textarea');
-    let todo = this.makeTodoObjectFromInputs($userInputs);
+class API {
+  add(todo) {
     $.ajax({
       type: 'post',
       url: '/api/todos',
       data: JSON.stringify(todo),
       contentType: 'application/json'
     });
+  }
+}
+
+class TodoList {
+  constructor() {
+    this.api = new API();
+  }
+
+  addTodoFromForm() {
+    let $form = $('#form_modal');
+    let $userInputs = $form.find('select, input[type="text"], textarea');
+    let todo = this.makeTodoObjectFromInputs($userInputs);
+    this.api.add(todo);
   }
 
   makeTodoObjectFromInputs($userInputs) {
@@ -78,14 +88,18 @@ class TodoList {
     
     return todo;
   }
+
+  makeMainTemplateObject() {
+
+  }
 }
 
 class App {
   constructor() {
-    this.registerPartials();
-    this.loadPage();
     this.todoList = new TodoList();
     this.mainTemplate = Handlebars.compile($('#main_template').html());
+    this.registerPartials();
+    this.loadPage();
   }
 
   registerPartials() {
@@ -94,7 +108,8 @@ class App {
     });
   }
 
-  loadPage() 
+  loadPage() {
+    let mainTemplateObject = this.todoList.makeMainTemplateObject();
     $('body').append(this.mainTemplate(templateObject));
     this.bindEvents();
   }
