@@ -151,15 +151,13 @@ class MainTemplateData {
   getCurrentSection(currentSectionKey, title) {
     let total;
     if (currentSectionKey.includes('date')) {
-      total = this[currentSectionKey][title];
+      total = this[currentSectionKey][title].length;
     } else {
       total = this[currentSectionKey].length;
     }
 
     return {title, total};
   }
-
-
 }
 
 class TodoList {
@@ -211,19 +209,25 @@ class App {
   loadPage(currentSectionTemplateKey = 'todos', currentSectionTitle = 'All Todos') {
     this.todoList.makeMainTemplateObject((mainTemplateObject) => {
       $('body').append(this.mainTemplate(mainTemplateObject));
+      $(`[data-title="${currentSectionTitle}"]`).addClass('active');
       this.bindEvents();
     }, currentSectionTemplateKey, currentSectionTitle);
   }
 
   reloadPage() {
+    let currentSectionTemplateKey = $('.active').attr('data-template-key');
+    let currentSectionTitle = $('.active').attr('data-title');
     $('body').empty();
-    this.loadPage();
+    this.loadPage(currentSectionTemplateKey, currentSectionTitle);
   }
 
   bindEvents() {
     $('label[for="new_item"').on('click', $.proxy(this.handleNewItemClick, this));
     $('#modal_layer').on('click', $.proxy(this.handleModalLayerClick, this));
     $('input[type="submit"').on('click', $.proxy(this.handleSaveClick, this));
+
+    // 2nd argument limits event to elements that represent a todo subset
+    $('#sidebar').on('click', '[data-title]', $.proxy(this.handleSidebarClick, this));
   }
 
   handleNewItemClick() {
@@ -245,6 +249,12 @@ class App {
     event.preventDefault();
     this.todoList.addTodoFromForm();
     this.resetAndHideModal();
+    this.reloadPage();
+  }
+
+  handleSidebarClick(event) {
+    $('.active').removeClass('active');
+    $(event.target).closest('[data-title]').addClass('active');
     this.reloadPage();
   }
 }
