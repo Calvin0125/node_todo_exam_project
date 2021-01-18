@@ -154,7 +154,7 @@
     {{/each}}
   </script>
   <script type="text/x-handlebars" id="all_todos_template" data-type="partial">
-    <header data-title="All Todos" data-total="{{todos.length}}" id="all_header">
+    <header data-title="All Todos" data-total="{{todos.length}}" data-template-key="todos" id="all_header" class="active">
       <dl>
        <dt>All Todos</dt><!--
       --><dd>{{todos.length}}</dd>
@@ -162,7 +162,7 @@
     </header>
   </script>
   <script type="text/x-handlebars" id="completed_todos_template" data-type="partial">
-    <header data-title="Completed" data-total="{{done.length}}" id="all_done_header">
+    <header data-title="Completed" data-total="{{done.length}}" data-template-key="done" id="all_done_header">
       <dl>
        <dt>Completed</dt><!--
       --><dd>{{done.length}}</dd>
@@ -171,7 +171,7 @@
   </script>
   <script type="text/x-handlebars" id="all_list_template" data-type="partial">
     {{#each todos_by_date}}
-      <dl data-title="{{@key}}" data-total="{{this.length}}">
+      <dl data-title="{{@key}}" data-total="{{this.length}}" data-template-key="todos_by_date">
         <dt><time>{{@key}}</time></dt>
         <dd>{{this.length}}</dd>
       </dl>
@@ -179,7 +179,7 @@
   </script>
   <script type="text/x-handlebars" id="completed_list_template" data-type="partial">
     {{#each done_todos_by_date}}
-      <dl data-title="{{@key}}" data-total="{{this.length}}" id="{{@key}}">
+      <dl data-title="{{@key}}" data-total="{{this.length}}" data-template-key="done_todos_by_date" id="{{@key}}">
         <dt><time>{{@key}}</time></dt>
         <dd>{{this.length}}</dd>
       </dl>
@@ -191,7 +191,7 @@
    </label>
    <dl>
      <dt><time>{{current_section.title}}</time></dt><!--
-  --><dd>{{current_section.data}}</dd>
+  --><dd>{{current_section.total}}</dd>
    </dl>
   </script>
   <script src="javascripts/app.js"></script>

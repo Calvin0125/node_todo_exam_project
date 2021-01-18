@@ -51,7 +51,7 @@ let templateObject = {
   ],
   current_section: {
     title: 'All Todos',
-    data: 3,
+    total: 3,
   }
 };
 
@@ -71,8 +71,13 @@ class API {
 }
 
 class MainTemplateData {
-  constructor(todos) {
+  constructor(todos, currentSectionKey, title) {
     this.todos = this.makeTodosArray(todos);
+    this.todos_by_date = this.getTodosByDate();
+    this.done = this.getCompletedTodos();
+    this.done_todos_by_date = this.getDoneTodosByDate();
+    this.selected = this.getSelectedTodos(currentSectionKey, title);
+    this.current_section = this.getCurrentSection(currentSectionKey, title);
   }
 
   makeTodosArray(todos) {
@@ -95,6 +100,66 @@ class MainTemplateData {
       return 'No Due Date';
     }
   }
+
+  getTodosByDate() {
+    let uniqueDates = this.getUniqueDates(this.todos);
+    let todosByDate = {}
+    uniqueDates.forEach(date => {
+      todosByDate[date] = this.todos.filter(todo => todo.due_date === date);
+    });
+
+    return todosByDate;
+  }
+
+  getUniqueDates(todos) {
+    let uniqueDates = [];
+    todos.forEach(todo => {
+      if (!uniqueDates.includes(todo.due_date)) {
+        uniqueDates.push(todo.due_date);
+      }
+    });
+
+    return uniqueDates;
+  }
+
+  getCompletedTodos() {
+    return this.todos.filter(todo => {
+      return todo.completed;
+    });
+  }
+
+  getDoneTodosByDate() {
+    let uniqueDates = this.getUniqueDates(this.done);
+    let doneTodosByDate = {};
+    uniqueDates.forEach(date => {
+      doneTodosByDate[date] = this.done_todos_by_date.filter(todo => {
+        return todo.due_date === date;
+      });
+    });
+
+    return doneTodosByDate;
+  }
+
+  getSelectedTodos(currentSectionKey, title) {
+    if (currentSectionKey.includes('date')) {
+      return this[currentSectionKey][title];
+    } else {
+      return this[currentSectionKey];
+    }
+  }
+
+  getCurrentSection(currentSectionKey, title) {
+    let total;
+    if (currentSectionKey.includes('date')) {
+      total = this[currentSectionKey][title];
+    } else {
+      total = this[currentSectionKey].length;
+    }
+
+    return {title, total};
+  }
+
+
 }
 
 class TodoList {
@@ -121,9 +186,10 @@ class TodoList {
     return todo;
   }
 
-  makeMainTemplateObject() {
+  makeMainTemplateObject(callback, currentSectionKey, title) {
     this.api.getAllTodos((data) => {
-      let mainTemplate = new MainTemplateData(data);
+      let mainTemplateData = new MainTemplateData(data, currentSectionKey, title);
+      callback(mainTemplateData);
     });
   }
 }
@@ -142,10 +208,11 @@ class App {
     });
   }
 
-  loadPage() {
-    let mainTemplateObject = this.todoList.makeMainTemplateObject();
-    $('body').append(this.mainTemplate(templateObject));
-    this.bindEvents();
+  loadPage(currentSectionTemplateKey = 'todos', currentSectionTitle = 'All Todos') {
+    this.todoList.makeMainTemplateObject((mainTemplateObject) => {
+      $('body').append(this.mainTemplate(mainTemplateObject));
+      this.bindEvents();
+    }, currentSectionTemplateKey, currentSectionTitle);
   }
 
   reloadPage() {
