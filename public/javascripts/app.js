@@ -56,7 +56,7 @@ let templateObject = {
 };
 
 class TodoList {
-  addFromForm() {
+  addTodoFromForm() {
     let $form = $('#form_modal');
     let $userInputs = $form.find('select, input[type="text"], textarea');
     let todo = this.makeTodoObjectFromInputs($userInputs);
@@ -82,19 +82,26 @@ class TodoList {
 
 class App {
   constructor() {
-    this.renderPage();
+    this.registerPartials();
+    this.loadPage();
     this.todoList = new TodoList();
+    this.mainTemplate = Handlebars.compile($('#main_template').html());
   }
 
-  renderPage() {
-    let mainTemplate = Handlebars.compile($('#main_template').html());
-
+  registerPartials() {
     $('[data-type="partial"]').each((_, partial) => {
       Handlebars.registerPartial(`${partial.id}`, `${$(partial).html()}`);
     });
+  }
 
-    $('body').append(mainTemplate(templateObject));
+  loadPage() 
+    $('body').append(this.mainTemplate(templateObject));
     this.bindEvents();
+  }
+
+  reloadPage() {
+    $('body').empty();
+    this.loadPage();
   }
 
   bindEvents() {
@@ -109,16 +116,20 @@ class App {
   }
 
   handleModalLayerClick() {
+    this.resetAndHideModal();
+  }
+
+  resetAndHideModal() {
     $('#form_modal').fadeOut();
     $('#modal_layer').fadeOut();
+    $('#form_modal form')[0].reset();
   }
 
   handleSaveClick(event) {
     event.preventDefault();
-    this.todoList.addFromForm();
-    $('#form_modal').fadeOut();
-    $('#modal_layer').fadeOut();
-    $('#form_modal form')[0].reset();
+    this.todoList.addTodoFromForm();
+    this.resetAndHideModal();
+    this.reloadPage();
   }
 }
 
