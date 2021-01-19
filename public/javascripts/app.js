@@ -187,8 +187,17 @@ class TodoList {
   makeMainTemplateObject(callback, currentSectionKey, title) {
     this.api.getAllTodos((data) => {
       let mainTemplateData = new MainTemplateData(data, currentSectionKey, title);
+      this.mainTemplateData = mainTemplateData;
       callback(mainTemplateData);
     });
+  }
+
+  makeListTemplateObject(currentSectionKey, title) {
+    return this.mainTemplateData.getSelectedTodos(currentSectionKey, title);
+  }
+
+  makeTitleTemplateObject(currentSectionKey, title) {
+    return this.mainTemplateData.getCurrentSection(currentSectionKey, title);
   }
 }
 
@@ -196,6 +205,8 @@ class App {
   constructor() {
     this.todoList = new TodoList();
     this.mainTemplate = Handlebars.compile($('#main_template').html());
+    this.listTemplate = Handlebars.compile($('#list_template').html());
+    this.titleTemplate = Handlebars.compile($('#title_template').html());
     this.registerPartials();
     this.loadPage();
   }
@@ -254,8 +265,21 @@ class App {
 
   handleSidebarClick(event) {
     $('.active').removeClass('active');
-    $(event.target).closest('[data-title]').addClass('active');
-    this.reloadPage();
+    let $currentSection = $(event.target).closest('[data-title]')
+    $currentSection.addClass('active');
+    let currentSectionKey = $currentSection.attr('data-template-key');
+    let title = $currentSection.attr('data-title');
+    this.reloadMainArea(currentSectionKey, title);
+  }
+
+  reloadMainArea(currentSectionKey, title) {
+    let titleTemplateObject = this.todoList.makeTitleTemplateObject(currentSectionKey, title);
+    $('#title-template-parent').empty()
+    $('#title-template-parent').append(this.titleTemplate({current_section: titleTemplateObject}));
+
+    let listTemplateObject = this.todoList.makeListTemplateObject(currentSectionKey, title);
+    $('#list-template-parent').empty()
+    $('#list-template-parent').append(this.listTemplate({selected: listTemplateObject}));
   }
 }
 
