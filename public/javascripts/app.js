@@ -103,7 +103,7 @@ class MainTemplateData {
   getSelectedTodos(currentSectionKey, title) {
     if (currentSectionKey.includes('date')) {
       title = title.replace(/completed/i, '');
-      return this[currentSectionKey][title];
+      return this[currentSectionKey][title] || [];
     } else {
       return this[currentSectionKey];
     }
@@ -113,7 +113,7 @@ class MainTemplateData {
     let total;
     if (currentSectionKey.includes('date')) {
       title = title.replace(/completed/i, '');
-      total = this[currentSectionKey][title].length;
+      total = this[currentSectionKey][title] ? this[currentSectionKey][title].length : 0;
     } else {
       total = this[currentSectionKey].length;
     }
