@@ -264,6 +264,7 @@ class App {
   }
 
   loadPage(currentSectionTemplateKey = 'todos', currentSectionTitle = 'All Todos') {
+    $('body').empty();
     this.todoList.makeMainTemplateObject((mainTemplateObject) => {
       $('body').append(this.mainTemplate(mainTemplateObject));
       $(`[data-title="${currentSectionTitle}"]`).addClass('active');
@@ -274,7 +275,6 @@ class App {
   reloadPage() {
     let currentSectionTemplateKey = $('.active').attr('data-template-key');
     let currentSectionTitle = $('.active').attr('data-title');
-    $('body').empty();
     this.loadPage(currentSectionTemplateKey, currentSectionTitle);
   }
 
@@ -330,7 +330,7 @@ class App {
         return;
       }
       this.resetAndHideModal();
-      this.reloadPage();
+      this.loadPage();
     });
   }
 
