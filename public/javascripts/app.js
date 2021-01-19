@@ -87,7 +87,23 @@ class MainTemplateData {
       }
     });
 
-    return uniqueDates;
+    return this.sortDates(uniqueDates);
+  }
+
+  sortDates(uniqueDates) {
+    return uniqueDates.sort((a, b) => {
+      if (a === b) {
+        return 0;
+      } else if (!/\d/.test(a)) {
+        return -1;
+      } else if (!/\d/.test(b)) {
+        return 1;
+      } else if (a.slice(3) === b.slice(3)) {
+        return +a.slice(0, 2) - +b.slice(0, 2);
+      } else {
+        return +a.slice(3) - +b.slice(3);
+      }
+    });
   }
 
   getCompletedTodos() {
