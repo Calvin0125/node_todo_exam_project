@@ -23,4 +23,5 @@ Reasons for Design Decisions
 Assumptions
 1. When the modal is closed, it should reset the form
 2. When "Mark as Complete" is clicked, any changes entered into the field should not be applied to the todo.
+3. A user will not enter a description of '!none!'. The API does not update when an empty string is sent for description, so a string with characters must be sent to remove the description. 
 
