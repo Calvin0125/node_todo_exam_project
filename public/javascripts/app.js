@@ -1,10 +1,21 @@
 class API {
-  add(todo) {
+  add(todo, callback) {
     $.ajax({
       type: 'post',
       url: '/api/todos',
       data: JSON.stringify(todo),
       contentType: 'application/json',
+      success: callback,
+    });
+  }
+
+  edit(todo, id, callback) {
+    $.ajax({
+      type: 'put',
+      url: `/api/todos/${id}`,
+      data: JSON.stringify(todo),
+      contentType: 'application/json',
+      success: callback,
     });
   }
 
@@ -151,11 +162,11 @@ class TodoList {
     this.api = new API();
   }
 
-  addTodoFromForm() {
+  addTodoFromForm(callback) {
     let $form = $('#form_modal');
     let $userInputs = $form.find('select, input[type="text"], textarea');
     let todo = this.makeTodoObjectFromInputs($userInputs);
-    this.api.add(todo);
+    this.api.add(todo, callback);
   }
 
   makeTodoObjectFromInputs($userInputs) {
@@ -184,6 +195,24 @@ class TodoList {
 
   makeTitleTemplateObject(currentSectionKey, title) {
     return this.mainTemplateData.getCurrentSection(currentSectionKey, title);
+  }
+
+  populateModalInputs(id) {
+    this.api.getTodo(id, (todo) => {
+      Object.keys(todo).forEach(key => {
+        if (key === 'id' || key === 'completed') {
+          return;
+        }
+
+        let $input = $(`#${key}`);
+        console.log($input);
+        if ($input.prop('tagName') === 'SELECT') {
+          $input.find(`option[value="${todo[key]}"]`).attr('selected', 'selected');
+        } else {
+          $input.val(todo[key]);
+        }
+      });
+    });
   }
 }
 
@@ -221,15 +250,21 @@ class App {
   bindEvents() {
     $('label[for="new_item"').on('click', $.proxy(this.handleNewItemClick, this));
     $('#modal_layer').on('click', $.proxy(this.handleModalLayerClick, this));
-    $('input[type="submit"').on('click', $.proxy(this.handleSaveClick, this));
+    $('#submit-modal-form').on('click', $.proxy(this.handleSaveClick, this));
 
     // 2nd argument limits event to elements that represent a todo subset
     $('#sidebar').on('click', '[data-title]', $.proxy(this.handleSidebarClick, this));
     $('#list-template-parent').on('click', 'td.list_item', $.proxy(this.handleTodoItemClick, this));
     $('#list-template-parent').on('click', 'td.delete', $.proxy(this.handleDeleteClick, this));
+    $('#list-template-parent').on('click', 'label', $.proxy(this.handleTodoTextClick, this));
   }
 
   handleNewItemClick() {
+    $('#form_modal').attr('data-action', 'add');
+    this.showModal();
+  }
+
+  showModal() {
     $('#form_modal').fadeIn();
     $('#modal_layer').fadeIn();
   }
@@ -246,9 +281,23 @@ class App {
 
   handleSaveClick(event) {
     event.preventDefault();
-    this.todoList.addTodoFromForm();
-    this.resetAndHideModal();
-    this.reloadPage();
+    let action = $('#form_modal').attr('data-action');
+    if (action === 'add') {
+      this.addTodo();
+    } else if (action === 'edit') {
+      this.editTodo();
+    }
+  }
+
+  addTodo() {
+    this.todoList.addTodoFromForm(() => {
+      this.resetAndHideModal();
+      this.reloadPage();
+    });
+  }
+
+  editTodo() {
+    return true;
   }
 
   handleSidebarClick(event) {
@@ -280,6 +329,14 @@ class App {
     this.todoList.api.toggleComplete(id, () => {
       this.reloadPage();
     });
+  }
+
+  handleTodoTextClick(event) {
+    event.preventDefault();
+    let id = $(event.target).closest('tr').attr('data-id');
+    $('#submit-modal-form').attr('data-id', id);
+    this.todoList.populateModalInputs(id);
+    this.showModal();
   }
 
   handleDeleteClick(event) {
