@@ -16,6 +16,14 @@ class API {
     $.get(`/api/todos/${id}`, callback, 'json');
   }
 
+  delete(id, callback) {
+    $.ajax({
+      type: 'delete',
+      url: `/api/todos/${id}`,
+      success: callback,
+    });
+  }
+
   toggleComplete(id, callback) {
     this.getTodo(id, data => {
       let completed = data.completed;
@@ -24,7 +32,7 @@ class API {
         url: `/api/todos/${id}`,
         data: JSON.stringify({completed: !completed}),
         contentType: 'application/json',
-        success: callback
+        success: callback,
       });
     });
   }
@@ -202,6 +210,7 @@ class App {
     // 2nd argument limits event to elements that represent a todo subset
     $('#sidebar').on('click', '[data-title]', $.proxy(this.handleSidebarClick, this));
     $('#list-template-parent').on('click', 'td.list_item', $.proxy(this.handleTodoItemClick, this));
+    $('#list-template-parent').on('click', 'td.delete', $.proxy(this.handleDeleteClick, this));
   }
 
   handleNewItemClick() {
@@ -253,6 +262,13 @@ class App {
 
     let id = $(event.target).closest('tr').attr('data-id');
     this.todoList.api.toggleComplete(id, () => {
+      this.reloadPage();
+    });
+  }
+
+  handleDeleteClick(event) {
+    let id = $(event.target).closest('tr').attr('data-id');
+    this.todoList.api.delete(id, () => {
       this.reloadPage();
     });
   }
