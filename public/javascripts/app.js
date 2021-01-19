@@ -163,17 +163,25 @@ class TodoList {
   }
 
   addTodoFromForm(callback) {
+    let todo = this.makeTodoObjectFromForm();
+    this.api.add(todo, callback);
+  }
+
+  editTodoFromForm(id, callback) {
+    let todo = this.makeTodoObjectFromForm();
+    this.api.edit(todo, id, callback);
+  }
+
+  makeTodoObjectFromForm() {
     let $form = $('#form_modal');
     let $userInputs = $form.find('select, input[type="text"], textarea');
-    let todo = this.makeTodoObjectFromInputs($userInputs);
-    this.api.add(todo, callback);
+    return this.makeTodoObjectFromInputs($userInputs);
   }
 
   makeTodoObjectFromInputs($userInputs) {
     let todo = {}
     $userInputs.each((_, input) => {
       if (input.value) {
-        console.log(input.value);
         todo[input.id] = input.value;
       }
     });
@@ -205,7 +213,6 @@ class TodoList {
         }
 
         let $input = $(`#${key}`);
-        console.log($input);
         if ($input.prop('tagName') === 'SELECT') {
           $input.find(`option[value="${todo[key]}"]`).attr('selected', 'selected');
         } else {
@@ -285,7 +292,8 @@ class App {
     if (action === 'add') {
       this.addTodo();
     } else if (action === 'edit') {
-      this.editTodo();
+      let id = $(event.target).attr('data-id');
+      this.editTodo(id);
     }
   }
 
@@ -296,8 +304,11 @@ class App {
     });
   }
 
-  editTodo() {
-    return true;
+  editTodo(id) {
+    this.todoList.editTodoFromForm(id, () => {
+      this.resetAndHideModal();
+      this.reloadPage();
+    });
   }
 
   handleSidebarClick(event) {
@@ -335,6 +346,7 @@ class App {
     event.preventDefault();
     let id = $(event.target).closest('tr').attr('data-id');
     $('#submit-modal-form').attr('data-id', id);
+    $('#form_modal').attr('data-action', 'edit');
     this.todoList.populateModalInputs(id);
     this.showModal();
   }
