@@ -5,7 +5,7 @@ class API {
       url: '/api/todos',
       data: JSON.stringify(todo),
       contentType: 'application/json',
-      success: callback,
+      complete: callback,
     });
   }
 
@@ -15,7 +15,7 @@ class API {
       url: `/api/todos/${id}`,
       data: JSON.stringify(todo),
       contentType: 'application/json',
-      success: callback,
+      complete: callback,
     });
   }
 
@@ -73,7 +73,7 @@ class MainTemplateData {
   }
 
   getDueDateFromAPITodo(apiTodo) {
-    if (apiTodo.month && apiTodo.year) {
+    if (+apiTodo.month > 0 && +apiTodo.year > 0) {
       return apiTodo.month + '/' + apiTodo.year.slice(2);
     } else {
       return 'No Due Date';
@@ -184,6 +184,7 @@ class TodoList {
 
   editTodoFromForm(id, callback) {
     let todo = this.makeTodoObjectFromForm();
+    console.log(todo);
     this.api.edit(todo, id, callback);
   }
 
@@ -196,11 +197,13 @@ class TodoList {
   makeTodoObjectFromInputs($userInputs) {
     let todo = {}
     $userInputs.each((_, input) => {
-      if (input.value) {
-        todo[input.id] = input.value;
-      }
+      todo[input.id] = input.value;
     });
     
+    if (todo.description === '') {
+      todo.description = '!none!';
+    }
+
     return todo;
   }
 
@@ -227,14 +230,20 @@ class TodoList {
           return;
         }
 
-        let $input = $(`#${key}`);
-        if ($input.prop('tagName') === 'SELECT') {
-          $input.find(`option[value="${todo[key]}"]`).attr('selected', 'selected');
-        } else {
-          $input.val(todo[key]);
-        }
+        this.populateSingleInput(todo, key);
       });
     });
+  }
+
+  populateSingleInput(todo, key) {
+    let $input = $(`#${key}`);
+    if ($input.prop('tagName') === 'SELECT') {
+      $input.find(`option[value="${todo[key]}"]`).attr('selected', 'selected');
+    } else if (todo[key] === '!none!') {
+      $input.val('');
+    } else {
+      $input.val(todo[key]);
+    }
   }
 }
 
@@ -314,14 +323,22 @@ class App {
   }
 
   addTodo() {
-    this.todoList.addTodoFromForm(() => {
+    this.todoList.addTodoFromForm((_, status) => {
+      if (status === 'error') {
+        alert('The todo could not be added. Please enter a title at least 3 characters long.');
+        return;
+      }
       this.resetAndHideModal();
       this.reloadPage();
     });
   }
 
   editTodo(id) {
-    this.todoList.editTodoFromForm(id, () => {
+    this.todoList.editTodoFromForm(id, (_, status) => {
+      if (status === 'error') {
+        alert('The todo could not be updated. Please enter a title at least 3 characters long.');
+        return;
+      }
       this.resetAndHideModal();
       this.reloadPage();
     });
