@@ -279,6 +279,7 @@ class App {
     $('#list-template-parent').on('click', 'td.list_item', $.proxy(this.handleTodoItemClick, this));
     $('#list-template-parent').on('click', 'td.delete', $.proxy(this.handleDeleteClick, this));
     $('#list-template-parent').on('click', 'label', $.proxy(this.handleTodoTextClick, this));
+    $('#mark-complete').on('click', $.proxy(this.handleMarkCompleteClick, this));
   }
 
   handleNewItemClick() {
@@ -371,6 +372,24 @@ class App {
     this.todoList.api.delete(id, () => {
       this.reloadPage();
     });
+  }
+
+  handleMarkCompleteClick(event) {
+    event.preventDefault();
+    if ($('#form_modal').attr('data-action') === "add") {
+      alert("Cannot mark complete as item has not yet been created.");
+    } else {
+      let id = $('#submit-modal-form').attr('data-id');
+      this.todoList.api.getTodo(id, (todo) => {
+        if (todo.completed) {
+          this.resetAndHideModal();
+        } else {
+          this.todoList.api.toggleComplete(id, () => {
+            this.reloadPage();
+          });
+        }
+      });
+    }
   }
 }
 
