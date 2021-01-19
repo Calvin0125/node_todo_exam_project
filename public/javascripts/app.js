@@ -136,12 +136,27 @@ class MainTemplateData {
   }
 
   getSelectedTodos(currentSectionKey, title) {
+    let selectedTodos;
     if (currentSectionKey.includes('date')) {
       title = title.replace(/completed/i, '');
-      return this[currentSectionKey][title] || [];
+      selectedTodos = this[currentSectionKey][title] || [];
     } else {
-      return this[currentSectionKey];
+      selectedTodos = this[currentSectionKey];
     }
+
+    return this.sortByCompleted(selectedTodos);
+  }
+
+  sortByCompleted(todos) {
+    return todos.sort((a, b) => {
+      if (a.completed && b.completed) {
+        return 0;
+      } else if (a.completed) {
+        return 1;
+      } else if (b.completed) {
+        return -1;
+      }
+    });
   }
 
   getCurrentSection(currentSectionKey, title) {
