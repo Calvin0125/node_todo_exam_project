@@ -308,6 +308,7 @@ class App {
   resetAndHideModal() {
     $('#form_modal').fadeOut();
     $('#modal_layer').fadeOut();
+    $('#form_modal select option').removeAttr('selected');
     $('#form_modal form')[0].reset();
   }
 
