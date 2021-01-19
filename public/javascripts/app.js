@@ -8,7 +8,7 @@ class API {
       complete: callback,
     });
   }
-
+  
   edit(todo, id, callback) {
     $.ajax({
       type: 'put',
@@ -184,7 +184,6 @@ class TodoList {
 
   editTodoFromForm(id, callback) {
     let todo = this.makeTodoObjectFromForm();
-    console.log(todo);
     this.api.edit(todo, id, callback);
   }
 
