@@ -25,4 +25,5 @@ Assumptions
 2. When "Mark as Complete" is clicked, any changes entered into the field should not be applied to the todo.
 3. A user will not enter a description of '!none!'. The API does not update when an empty string is sent for description, so a string with characters must be sent to remove the description. 
 4. Duplicate todos are allowed because a user might want to add something twice, and they can be differentiated by their ID.
+5. If editing the todo causes the currently selected group to disappear, the header will show the group with a count of 0, the todo list will appear empty, and no sidebar group will be selected. 
 
