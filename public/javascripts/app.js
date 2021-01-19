@@ -4,12 +4,29 @@ class API {
       type: 'post',
       url: '/api/todos',
       data: JSON.stringify(todo),
-      contentType: 'application/json'
+      contentType: 'application/json',
     });
   }
 
   getAllTodos(callback) {
     $.get('/api/todos', callback, 'json');
+  }
+
+  getTodo(id, callback) {
+    $.get(`/api/todos/${id}`, callback, 'json');
+  }
+
+  toggleComplete(id, callback) {
+    this.getTodo(id, data => {
+      let completed = data.completed;
+      $.ajax({
+        type: 'put',
+        url: `/api/todos/${id}`,
+        data: JSON.stringify({completed: !completed}),
+        contentType: 'application/json',
+        success: callback
+      });
+    });
   }
 }
 
@@ -75,7 +92,7 @@ class MainTemplateData {
     let uniqueDates = this.getUniqueDates(this.done);
     let doneTodosByDate = {};
     uniqueDates.forEach(date => {
-      doneTodosByDate[date] = this.done_todos_by_date.filter(todo => {
+      doneTodosByDate[date] = this.done.filter(todo => {
         return todo.due_date === date;
       });
     });
@@ -85,6 +102,7 @@ class MainTemplateData {
 
   getSelectedTodos(currentSectionKey, title) {
     if (currentSectionKey.includes('date')) {
+      title = title.replace(/completed/i, '');
       return this[currentSectionKey][title];
     } else {
       return this[currentSectionKey];
@@ -94,6 +112,7 @@ class MainTemplateData {
   getCurrentSection(currentSectionKey, title) {
     let total;
     if (currentSectionKey.includes('date')) {
+      title = title.replace(/completed/i, '');
       total = this[currentSectionKey][title].length;
     } else {
       total = this[currentSectionKey].length;
@@ -182,6 +201,7 @@ class App {
 
     // 2nd argument limits event to elements that represent a todo subset
     $('#sidebar').on('click', '[data-title]', $.proxy(this.handleSidebarClick, this));
+    $('#list-template-parent').on('click', 'td.list_item', $.proxy(this.handleTodoItemClick, this));
   }
 
   handleNewItemClick() {
@@ -223,6 +243,18 @@ class App {
     let listTemplateObject = this.todoList.makeListTemplateObject(currentSectionKey, title);
     $('#list-template-parent').empty()
     $('#list-template-parent').append(this.listTemplate({selected: listTemplateObject}));
+  }
+
+  handleTodoItemClick(event) {
+    if (event.target.tagName === 'LABEL') {
+      event.preventDefault();
+      return;
+    }
+
+    let id = $(event.target).closest('tr').attr('data-id');
+    this.todoList.api.toggleComplete(id, () => {
+      this.reloadPage();
+    });
   }
 }
 

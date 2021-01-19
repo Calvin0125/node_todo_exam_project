@@ -179,7 +179,7 @@
   </script>
   <script type="text/x-handlebars" id="completed_list_template" data-type="partial">
     {{#each done_todos_by_date}}
-      <dl data-title="{{@key}}" data-total="{{this.length}}" data-template-key="done_todos_by_date" id="{{@key}}">
+      <dl data-title="completed{{@key}}" data-total="{{this.length}}" data-template-key="done_todos_by_date" id="{{@key}}">
         <dt><time>{{@key}}</time></dt>
         <dd>{{this.length}}</dd>
       </dl>
