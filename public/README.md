@@ -20,3 +20,6 @@ Separation of concerns
 Reasons for Design Decisions
 1. A todo class would not work well because the todo object has to be in different formats
 
+Assumptions
+1. When the modal is closed, it should reset the form
+
