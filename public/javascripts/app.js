@@ -8,7 +8,7 @@ class API {
       complete: callback,
     });
   }
-  
+
   edit(todo, id, callback) {
     $.ajax({
       type: 'put',
@@ -102,6 +102,7 @@ class MainTemplateData {
   }
 
   sortDates(uniqueDates) {
+    // date format mm/yy
     return uniqueDates.sort((a, b) => {
       if (a === b) {
         return 0;
@@ -163,7 +164,8 @@ class MainTemplateData {
     let total;
     if (currentSectionKey.includes('date')) {
       title = title.replace(/completed/i, '');
-      total = this[currentSectionKey][title] ? this[currentSectionKey][title].length : 0;
+      total = this[currentSectionKey][title] ? 
+              this[currentSectionKey][title].length : 0;
     } else {
       total = this[currentSectionKey].length;
     }
@@ -243,6 +245,18 @@ class TodoList {
     } else {
       $input.val(todo[key]);
     }
+  }
+
+  markComplete(id, callback) {
+    this.api.getTodo(id, (todo) => {
+      if (todo.completed) {
+        callback(todo.completed);
+      } else {
+        this.api.toggleComplete(id, () => {
+          callback(todo.completed);
+        });
+      }
+    });
   }
 }
 
@@ -397,16 +411,18 @@ class App {
       alert("Cannot mark complete as item has not yet been created.");
     } else {
       let id = $('#submit-modal-form').attr('data-id');
-      this.todoList.api.getTodo(id, (todo) => {
-        if (todo.completed) {
-          this.resetAndHideModal();
-        } else {
-          this.todoList.api.toggleComplete(id, () => {
-            this.reloadPage();
-          });
-        }
-      });
+      this.markComplete(id);
     }
+  }
+
+  markComplete(id) {
+    this.todoList.markComplete(id, (completed) => {
+      if (completed) {
+        this.resetAndHideModal();
+      } else {
+        this.reloadPage();
+      }
+    });
   }
 }
 
