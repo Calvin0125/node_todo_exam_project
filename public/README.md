@@ -21,6 +21,7 @@ Reasons for Design Decisions
 1. A todo class would not work well because the todo object has to be in different formats depending on how it is used, and would result in too much unnecessary code. 
 2. Rather than use the error attribute on the object passed to $.ajax, an if statement is used to check if the request failed. This is because the error function was running every time. After spending over an hour reading the documentation and trying different things, I decided to use the if statement so that I could continue with the project. 
 3. The API object is accessible to the App object through the TodoList object. This is because some of the requests only require an ID and do not have to do anything with the response, so it was unnecessary to add an intermediate method to the TodoList object to manipulate the data. 
+4. I added the string 'completed' to the data-title attribute for completed to the dl element in the completed list template so that no sidebar list titles have the same data-title attribute. This allows a single list title to be selected more easily. 
 
 Assumptions
 1. When the modal is closed, it should reset the form
