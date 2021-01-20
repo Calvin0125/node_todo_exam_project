@@ -1,3 +1,5 @@
+'use strict';
+
 class API {
   add(todo, callback) {
     $.ajax({
@@ -82,7 +84,7 @@ class MainTemplateData {
 
   getTodosByDate() {
     let uniqueDates = this.getUniqueDates(this.todos);
-    let todosByDate = {}
+    let todosByDate = {};
     uniqueDates.forEach(date => {
       todosByDate[date] = this.todos.filter(todo => todo.due_date === date);
     });
@@ -196,7 +198,7 @@ class TodoList {
   }
 
   makeTodoObjectFromInputs($userInputs) {
-    let todo = {}
+    let todo = {};
     $userInputs.each((_, input) => {
       todo[input.id] = input.value;
     });
@@ -278,8 +280,8 @@ class App {
 
   loadPage(currentSectionTemplateKey = 'todos', currentSectionTitle = 'All Todos') {
     $('body').empty();
-    this.todoList.makeMainTemplateObject((mainTemplateObject) => {
-      $('body').append(this.mainTemplate(mainTemplateObject));
+    this.todoList.makeMainTemplateObject((mainTemplateData) => {
+      $('body').append(this.mainTemplate(mainTemplateData));
       $(`[data-title="${currentSectionTitle}"]`).addClass('active');
       this.bindEvents();
     }, currentSectionTemplateKey, currentSectionTitle);
@@ -360,7 +362,7 @@ class App {
 
   handleSidebarClick(event) {
     $('.active').removeClass('active');
-    let $currentSection = $(event.target).closest('[data-title]')
+    let $currentSection = $(event.target).closest('[data-title]');
     $currentSection.addClass('active');
     let currentSectionKey = $currentSection.attr('data-template-key');
     let title = $currentSection.attr('data-title');
@@ -368,13 +370,13 @@ class App {
   }
 
   reloadMainArea(currentSectionKey, title) {
-    let titleTemplateObject = this.todoList.makeTitleTemplateObject(currentSectionKey, title);
-    $('#title-template-parent').empty()
-    $('#title-template-parent').append(this.titleTemplate({current_section: titleTemplateObject}));
+    let titleTemplateData = this.todoList.makeTitleTemplateObject(currentSectionKey, title);
+    $('#title-template-parent').empty();
+    $('#title-template-parent').append(this.titleTemplate({current_section: titleTemplateData}));
 
-    let listTemplateObject = this.todoList.makeListTemplateObject(currentSectionKey, title);
-    $('#list-template-parent').empty()
-    $('#list-template-parent').append(this.listTemplate({selected: listTemplateObject}));
+    let listTemplateData = this.todoList.makeListTemplateObject(currentSectionKey, title);
+    $('#list-template-parent').empty();
+    $('#list-template-parent').append(this.listTemplate({selected: listTemplateData}));
   }
 
   handleTodoItemClick(event) {
@@ -407,8 +409,8 @@ class App {
 
   handleMarkCompleteClick(event) {
     event.preventDefault();
-    if ($('#form_modal').attr('data-action') === "add") {
-      alert("Cannot mark complete as item has not yet been created.");
+    if ($('#form_modal').attr('data-action') === 'add') {
+      alert('Cannot mark complete as item has not yet been created.');
     } else {
       let id = $('#submit-modal-form').attr('data-id');
       this.markComplete(id);
